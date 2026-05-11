@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue
+    url: https://github.com/frankiearmijo1234-droid/metis/security/policy
+    about: For security vulnerabilities, follow the disclosure process in SECURITY.md. Do not open a public issue.
+  - name: Question or discussion
+    url: https://github.com/frankiearmijo1234-droid/metis/discussions
+    about: For usage questions, design discussions, or "how do I do X?" — please use Discussions instead of an issue.

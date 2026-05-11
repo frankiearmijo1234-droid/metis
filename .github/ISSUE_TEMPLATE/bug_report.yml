@@ -1,0 +1,83 @@
+name: Bug report
+description: Report a bug or unexpected behavior in metis.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report. A small, reproducible example helps enormously.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, and what went wrong?
+      placeholder: I tried to solve a 100-variable QUBO and got an exception...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproducer
+      description: A short, runnable Python snippet that reproduces the bug.
+      render: python
+      placeholder: |
+        from metis import default_router, Problem, ProblemKind
+        import numpy as np
+        router = default_router()
+        # ... your code that reproduces the bug
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      description: What should have happened instead?
+
+  - type: input
+    id: version
+    attributes:
+      label: metis version
+      description: Output of `python -c "import metis; print(metis.__version__)"`
+      placeholder: "0.6.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: "3.12.4"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Linux
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: extras
+    attributes:
+      label: Optional extras installed
+      options:
+        - label: mlx
+        - label: ortools
+        - label: mcp
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Logs, screenshots, related issues, or other context.

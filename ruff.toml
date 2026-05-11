@@ -1,0 +1,37 @@
+# Ruff configuration for metis.
+#
+# Philosophy: flag real bugs (undefined names, unreachable code, security
+# issues) without forcing churn on stylistic decisions that have no
+# behavioral consequences. We use Black-compatible 88-character lines.
+
+line-length = 88
+target-version = "py310"
+
+[lint]
+# Default rules + a handful of useful extras. Notable adds:
+#   B  flake8-bugbear (real bugs, not style)
+#   I  isort import order
+#   UP pyupgrade (use modern Python syntax)
+select = ["E", "F", "W", "B", "I", "UP"]
+
+# Tolerated in this codebase:
+#   E501  long lines (we use 88-char target; occasional long URLs/strings ok)
+#   E702  multiple statements on one line via semicolon
+#         (legitimate in test setup: `Q = ...; Q = (Q + Q.T) / 2`)
+#   E402  module-level import not at top of file
+#         (legitimate in MCP server: imports follow sys.path tweaks)
+#   F841  unused variable
+#         (legitimate in tests: variable name documents intent)
+#   B008  function call in default argument
+#         (numpy default RNG patterns)
+#   B007  unused loop control variable
+#         (variable name like `for layer in range(...)` serves as documentation)
+#   B905  zip without strict=
+#         (intentional in algorithm code where lengths are guaranteed equal)
+ignore = ["E501", "E702", "E402", "F841", "B008", "B007", "B905"]
+
+[lint.per-file-ignores]
+# Tests can use shorter idiomatic patterns.
+"tests/**/*.py" = ["B011"]
+# __init__.py modules legitimately re-export.
+"**/__init__.py" = ["F401", "F403"]

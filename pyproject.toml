@@ -1,0 +1,124 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "metis-compute"
+version = "0.6.0"
+description = "Local compute orchestrator for Apple Silicon: 10 engines for quantum simulation, optimization, and sampling. The right algorithm picks itself."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Frankie Armijo", email = "frankiearmijo1234-droid@users.noreply.github.com" }]
+maintainers = [{ name = "Frankie Armijo", email = "frankiearmijo1234-droid@users.noreply.github.com" }]
+keywords = [
+    "mcp",
+    "claude-code",
+    "quantum",
+    "quantum-simulation",
+    "stabilizer",
+    "tensor-network",
+    "mps",
+    "optimization",
+    "qubo",
+    "qaoa",
+    "simulated-annealing",
+    "parallel-tempering",
+    "mcmc",
+    "mlx",
+    "apple-silicon",
+    "or-tools",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    # qmlx provides the state-vector simulator. Until it's published to PyPI,
+    # install from source first: `pip install -e .` from the qmlx repo
+    # (https://github.com/frankiearmijo1234-droid/qmlx). See README for steps.
+    "qmlx>=0.1.0",
+]
+
+[project.optional-dependencies]
+mlx = ["mlx>=0.20"]
+mcp = ["mcp>=1.0"]
+ortools = ["ortools>=9.10"]
+dev = [
+    "pytest>=7",
+    "pytest-cov>=4",
+    "ortools>=9.10",
+    "ruff>=0.8.0",
+    "black>=24.0",
+    "pre-commit>=3.5",
+]
+all = ["mlx>=0.20", "mcp>=1.0", "ortools>=9.10"]
+
+[project.urls]
+Homepage = "https://github.com/frankiearmijo1234-droid/metis"
+Repository = "https://github.com/frankiearmijo1234-droid/metis"
+Issues = "https://github.com/frankiearmijo1234-droid/metis/issues"
+Changelog = "https://github.com/frankiearmijo1234-droid/metis/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+include = ["metis*"]
+
+# ---------- pytest ----------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+# Treat warnings as errors so accidental DeprecationWarnings don't sneak in.
+filterwarnings = [
+    "error",
+    # Tolerate numpy / scipy deprecation warnings from upstream we can't fix.
+    "ignore::DeprecationWarning:numpy.*",
+    "ignore::DeprecationWarning:scipy.*",
+    "ignore::PendingDeprecationWarning",
+]
+
+# ---------- black ----------
+[tool.black]
+line-length = 88
+target-version = ["py310", "py311", "py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  \.venv
+  | build
+  | dist
+)/
+'''
+
+# ---------- coverage ----------
+[tool.coverage.run]
+branch = true
+source = ["metis"]
+omit = [
+    "*/tests/*",
+    "*/benchmarks/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
