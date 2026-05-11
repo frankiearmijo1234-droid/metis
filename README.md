@@ -128,13 +128,15 @@ python examples/02_all_engines.py
 
 Six different problems, six different engines picked automatically:
 
+_Measured on Apple Silicon with `QMLX_BACKEND=numpy` (MLX not installed); wall times for problems 1–2 include first-call Python module import overhead._
+
 ```
-1. Small QUBO (n=8)               → classical            (1.0ms,  optimal)
-2. Constrained QUBO (n=12, hi=5)  → ortools_cpsat        (4.2ms,  optimal)
-3. Big QUBO (n=2000)              → simulated_annealing  (0.5s,   heuristic)
-4. ILP (resource alloc)           → ortools_cpsat        (3.2ms,  optimal)
-5. Quantum + T gate (n=4)         → qmlx_statevector     (3ms,    exact)
-6. 1000-qubit GHZ                 → stabilizer           (25.6s,  exact)
+1. Small QUBO (n=8)               → classical            (547ms,  optimal)
+2. Constrained QUBO (n=12, hi=5)  → ortools_cpsat        (624ms,  optimal)
+3. Big QUBO (n=2000)              → simulated_annealing  (0.39s,  heuristic)
+4. ILP (resource alloc)           → ortools_cpsat        (3.7ms,  optimal)
+5. Quantum + T gate (n=4)         → qmlx_statevector     (3.4ms,  exact)
+6. 1000-qubit GHZ                 → stabilizer           (49.0s,  exact)
 ```
 
 Same router. Same API. Six different engines. Each pick has a routing reason you can inspect.
