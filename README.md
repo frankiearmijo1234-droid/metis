@@ -120,6 +120,118 @@ Ten engines. One router. One audit trail. Same `Problem(kind, payload)` everywhe
 
 ---
 
+## What you can actually solve with it
+
+Three problem types. Ten engines. The router picks which engine fits — you describe the problem in code, not algorithm choice.
+
+### Bucket 1 — Optimization
+
+*"I have lots of binary choices and want the combination that minimizes some quantity."*
+
+Real examples:
+- Portfolio selection (pick K assets out of N to maximize Sharpe under a budget constraint)
+- Resource allocation (assign trucks to routes minimizing miles)
+- Scheduling (fit tasks into slots respecting precedence)
+- Max-cut on graphs, vertex cover, set cover, knapsack
+
+Engines that fire: `classical`, `simulated_annealing`, `simulated_annealing_mlx`, `parallel_tempering`, `qaoa`, `ortools_cpsat`
+
+```python
+from metis import default_router, Problem, ProblemKind
+import numpy as np
+
+# Portfolio: pick exactly 3 of 8 assets, minimize risk-adjusted cost
+Q = np.random.default_rng(42).standard_normal((8, 8))
+Q = (Q + Q.T) / 2
+
+sol = default_router().solve(Problem(
+    kind=ProblemKind.OPTIMIZATION,
+    payload={
+        "qubo_Q": Q,
+        "qubo_solve": True,
+        "linear_constraints": [{"coeffs": [1.0]*8, "lo": 3, "hi": 3}],
+    },
+    hints={"size": 8},
+))
+
+print(sol.engine_name)              # 'ortools_cpsat' — only engine that handles constraints
+print(sol.value["x"])               # binary vector with exactly 3 ones
+```
+
+### Bucket 2 — Sampling
+
+*"I have a probability distribution and want to draw samples to understand its shape."*
+
+Real examples:
+- Bayesian posterior inference (estimate parameters with uncertainty)
+- Spin glass exploration (map an energy landscape)
+- Continuous-variable MCMC (moments, modes, tails)
+
+Engines that fire: `mcmc` (the only sampling-capable engine in the roster)
+
+```python
+from metis import default_router, Problem, ProblemKind
+import numpy as np
+
+# Sample from a 20-variable QUBO at finite temperature
+Q = np.random.default_rng(0).standard_normal((20, 20))
+Q = (Q + Q.T) / 2
+
+sol = default_router().solve(Problem(
+    kind=ProblemKind.SAMPLING,
+    payload={"qubo_Q": Q, "qubo_sample": True, "T": 0.5, "n_samples": 500},
+    hints={"n_chains": 4, "burn_in": 1000, "seed": 0},
+))
+
+print(sol.value["samples"].shape)   # (500, 4, 20) — 500 samples × 4 chains × 20 vars
+print(sol.value["min_energy_seen"]) # lowest energy explored
+```
+
+### Bucket 3 — Quantum simulation
+
+*"I have a quantum circuit and want to know what it does."*
+
+Real examples:
+- Algorithm prototyping (Grover, QFT, Deutsch-Jozsa, VQE warmup)
+- Stabilizer circuits at scale (1,000+ qubit Clifford circuits, exact)
+- Low-entanglement circuits up to 200 qubits (MPS tensor network)
+- General gate sets up to 28 qubits (full state-vector)
+
+Engines that fire: `qmlx_statevector`, `mps`, `stabilizer`
+
+```python
+from metis import default_router, Problem, ProblemKind
+
+# 1000-qubit GHZ state. Only stabilizer can handle this.
+# State-vector would need 2^1000 ≈ 10^301 amplitudes.
+ops = [{"gate": "H", "qubits": [0]}]
+for q in range(999):
+    ops.append({"gate": "CNOT", "qubits": [q, q + 1]})
+
+sol = default_router().solve(Problem(
+    kind=ProblemKind.QUANTUM_CIRCUIT,
+    payload={"n_qubits": 1000, "ops": ops, "task": "sample",
+             "task_args": {"n_shots": 10}},
+))
+
+print(sol.engine_name)              # 'stabilizer' — picked automatically
+# All shots are either 1000 zeros or 1000 ones, never a mixed bitstring.
+```
+
+### Why the router matters
+
+Same `Problem(kind, payload)` API for all three buckets. Same `Solution` shape coming back. The router picks the engine, you don't. When a 30-variable QUBO routes to `parallel_tempering` over `simulated_annealing` because PT's cost estimate is lower at that size, you didn't have to know that. When a 1000-qubit GHZ routes to `stabilizer` instead of `qmlx_statevector` because the circuit is Clifford-only and the qubit count is past state-vector range, you didn't have to know that either.
+
+Every routing decision is auditable:
+
+```python
+sol.metadata["routing_decision"].chosen     # which engine
+sol.metadata["routing_decision"].reason     # why this one
+sol.metadata["routing_decision"].rejected   # why the others said no
+```
+
+---
+
 ## Sample run — the all-engines demo
 
 ```bash
