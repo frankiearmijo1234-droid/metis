@@ -24,9 +24,11 @@ import numpy as np
 
 from metis import Problem, ProblemKind, default_router
 
-# Hard limits matching qmlx + metis security model
+# Hard limits. MAX_N_QUBITS matches the stabilizer engine's tableau cap
+# (10 000 qubits, ~3 MB memory). Statevector engines cap themselves
+# internally via can_handle(); this value is DoS protection only.
 MAX_N_VARS = 100
-MAX_N_QUBITS = 28
+MAX_N_QUBITS = 10_000
 MAX_N_OPS = 100_000
 MAX_N_SWEEPS = 100_000
 MAX_N_RESTARTS = 100
@@ -175,7 +177,7 @@ def run_quantum_circuit(
     """Run a quantum circuit and return measurement results.
 
     Args:
-        n_qubits: Number of qubits, 1..28.
+        n_qubits: Number of qubits, 1..10000.
         ops: List of gate operations. Each op:
              {"gate": str, "qubits": [int], "params": [float] (optional)}
              Allowed gates: H, X, Y, Z, S, T, RX, RY, RZ, CNOT, CZ, SWAP, ...
